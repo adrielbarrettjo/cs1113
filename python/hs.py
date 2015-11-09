@@ -8,13 +8,15 @@
 ### if n = 1, print the length of sequence of numbers that has been produced
 ### and return none
 
-def hs(n)
+def hs(n):
     count = 0
     while (n != 1):
         print(n)
-        if (n % 2 == 0)
+        if (n % 2 == 0):
             n = n//2
         else:
             n = 3*n+1
         count = count + 1
-    return count
+    print(1)
+    print(count)
+    return("None")
