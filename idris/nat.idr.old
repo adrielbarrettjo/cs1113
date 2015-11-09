@@ -1,0 +1,247 @@
+module nat
+import bool
+import pair
+
+---Nat for Monday (1)
+{- We now introduce a type to represent the natural numbers using
+Peano arithmetic.
+
+In this arithmetic, there are two especially important rules
+- zero is a natural number
+- the successor of any natural number is a natural number
+
+From this pair of rules arises an infinity of natural numbers. Zero is
+a natural number, and the successor of any natural number is a natural
+number, so the successor of zero is a natural number; and now, because
+the successor of zero is a natural number, its successor, i.e., the
+successor of (the successor of zero) is one too; ad infinitum!
+
+HOMEWORK #1: Learn this way of thinking by rehearsing it mentally
+until you've really got it. Work with friends. Explain it to each
+other. Test each other. -}
+
+{- We capture this idea with the following deceptively simple data
+type definition. What it says is that nat is a type, and there are two
+ways to construct a nat. One is to use the constructor, O. The other
+is to apply the constructor S to a value that is already known to be
+of type nat.  Because O is already known to be of type nat, you can
+thus apply S to O (yielding the term (S O)) and the result is also of
+type nat. And now because it is a value of type nat, you can apply S
+to it to get another value of type nat. Ad infinitum.
+
+HOMEWORK #2: Study and think about this example as many times as
+necessary to get it. Work with friends. Teach each other. Test each
+other.  -}
+
+-- Here's our data type definition.
+
+||| A data type to represent the natural numbers.  We use a lower case
+||| "n" in the name to distinguish our nat type from Idris's Nat type
+data nat = O | S nat
+
+-- HOMEWORK #3: In the REPL ask what are the types of nat, O and S.
+-- Be sure you understand the answers! Teach, learning from and test
+-- friends.
+
+{-
+ANSWER #3: The type of O is nat; the type of S is nat -> nat; and
+the type of nat is Type. In other words, O is a value of type nat.
+The constructor S is basically a function that takes a nat and gives
+you back a (one bigger) nat. And nat is a type, which makes it a
+value of the type called Type.
+-}
+
+{-
+Here are some examples of some objects (named values) of type nat.
+-}
+
+-- zero
+z: nat
+z = O
+
+-- one
+o: nat
+o = S O
+
+-- two
+t: nat
+t = S (S O)
+
+-- three
+r: nat
+r = S t
+
+-- HOMEWORK #5: Make up some examples of your own. Add them below this
+-- comment.
+
+-- One possible answer
+
+s: nat
+s = S (S (S (S (S (S (S O))))))
+
+-- HOMEWORK #6: r is
+-- unfolded to S t; t is unfolded to S (S O); so the whole expression
+-- unfolds to S (S (S O)).
+
+||| returns true if the argument is (represents) zero, otherwise false
+isZero: nat -> bool
+isZero O = true
+isZero _ = false
+
+-- HOMEWORK #7 Bind x to the result of applying isZero to r.
+x: bool
+x = isZero r
+
+||| returns the successor of any given nat
+succ: nat -> nat
+succ n = S n
+
+-- HOMEWORK #8 Bind y to the result of applying succ to O.
+y: nat
+y = (succ O)
+
+||| returns the predecessor of any given nat
+pred: nat -> nat
+pred O = O
+pred (S n) = n
+
+||| return true if the argument is even otherwise false
+evenb: nat -> bool
+evenb O = true
+evenb (S O) = false
+evenb (S (S n)) = evenb n
+
+||| return false if the argument is even otherwise true
+||| i.e., return true if it's odd and false if it's even
+oddb: nat -> bool
+oddb n = not (evenb n)
+
+
+-- HOMEWORK #9 Bind a, b, c, d, e respectively to the results of
+-- applying evenb to O, (S O), (S (S O)) r, and (S r),
+-- respectively.
+
+a: bool
+a = evenb O
+
+b: bool
+b = evenb (S O)
+
+c: bool
+c = evenb (S (S O))
+
+d: bool
+d = evenb (S r)
+
+--HOMEWORK #10 In English, describe all of the steps involved in
+--evaluating the function application expression, evenb (S r).
+
+{- Professor Sullivan's answer
+First the expression (S r) is evaluated, then evenb is applied to the
+Boolean result of that process. To evaluate (S r) first r is evaluated,
+then S is applied to the nat result to produce a new nat. r is evaluated
+by unfolding it to (S t) and by then evaluating that expressions. (S t)
+is evaluated by first evaluating t and then applying S to the result to
+produce a nat. The final part of this answer is that t is evaluated by
+unfolding it to (S (S O)), evaluating this expression, and returning the
+result, which is just the term (S (S O)).
+-}
+
+-- HOMEWORK #11 Here's a function that takes a pair of natural numbers
+-- (values of type nat) and that returns their sum (as another value
+-- of type nat). We give you the function name and type along with the
+-- left hand sides of the two rules that you'll need. We've filled in
+-- the right hand sides with placeholders. Your task is to replace the
+-- right hand sides of the two rules.
+
+-- We use ==> to mean "reduces to" or "returns"
+
+-- addp (mkPair O O) ==> O
+-- addp (mkPair O (S (S O))) ==> S (S O)
+-- addp (mkPair (S O) O) ==> S O
+-- addp (mkPair (S (S O)) (S (S (S O)))) ==> S (S (S (S (S O))))
+
+||| given a pair of natural numbers, return its sum
+addp: pair nat nat -> nat
+addp (mkPair O m) = m
+addp (mkPair (S n) m) = S (addp (mkPair n m))
+
+-- HOMEWORK #12 -
+
+||| a test, expecting O
+h1: nat
+h1 = addp (mkPair O O)
+
+||| a test, expecting S (S O)
+h2: nat
+h2 = addp (mkPair O (S (S O)))
+
+||| a test, expecting (S O)
+h3: nat
+h3 = addp (mkPair (S O) O)
+
+||| a test, expecting (S (S (S (S (S O)))))
+h4: nat
+h4 = addp (mkPair (S (S O)) (S (S (S O))))
+
+--------------------------------------------------------------------------------------
+--- Nat for Wednesday (2)
+
+multp: pair nat nat -> nat
+multp (mkPair O m) = O
+multp (mkPair m O) = O
+multp (mkPair (S n) m) =  addp (mkPair m (multp(mkPair n m)))
+
+factp: nat -> nat
+factp O = O
+factp (S n) = mutlp(mkpair((S n) factp(n)))
+
+--- Nat for Friday (3)
+
+-- #5: exp - given a pair of natural numbers, (x, n), return the value of x raised to the nth power
+exp: pair nat nat -> nat
+exp (mkPair O O) = O
+exp (mkPair (S _) O) = (S O)
+exp (mkPair O (S _)) = O
+exp (mkPair (S n) m) = multp (mkPair(m exp(mkPair n m)))
+
+-- #6: lep -- given a pair of natural numbers, (a, b), return true if a is less than or equal to b,
+---otherwise return false
+lep: pair nat nat -> bool
+lep (mkPair O (S _ ) ) = true
+lep (mkPair (S _) O ) = false
+lep (mkPair (S n) (S m)) = lep (mkPair n m)
+
+-- #7: eqp -- given a pair of natural numbers, (a, b), return true if a is equal to be, otherwise return false
+eqp: pair nat nat -> bool
+eqp (mkPair O O) = true
+eqp (mkPair (S _) O ) = false
+eqp (mkPair O (S _)) = false
+eqp (mkPair (S n) (S m)) =  eqp (mkPair n m)
+
+--#8: gtp -- given a pair of natural numbers, (a, b), return true if a is greater than b,
+---otherwise return false
+gtp: pair nat nat -> bool
+gtp (mkPair O (S _ ) ) = false
+gtp (mkPair (S _) O ) = true
+gtp (mkPair (S n) (S m)) = gtp (mkPair n m)
+
+--  #9: gep -- given a pair of natural numbers, (a, b), return true of a is greater than or equal to b
+gep: pair nat nat -> bool
+gep (mkPair O O) = true
+gep (mkPair O (S _)) = false
+gep (mkPair (S _) O) = true
+gep (mkPair (S n) (S m)) = gep (mkPair n m)
+
+-- #10: ltp -- given a pair of natural numbers, (a, b), return true if a is less than b
+ltp: pair nat nat -> bool
+ltp (mkPair O O) = false
+ltp (mkPair (S _) O) = false
+ltp (mkPair O (S _)) = true
+ltp (mkPair (S n) (S m)) = ltp (mkPair n m)
+
+_______________________________________
+
+add: nat -> nat -> nat
+add O m = m
+add (S n) O = S(add n m)
